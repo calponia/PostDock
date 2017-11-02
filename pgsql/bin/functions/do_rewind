@@ -11,11 +11,11 @@ if [[ "$MASTER_SLAVE_SWITCH" == "1" ]] || [ "$TRY_TO_FOLLOW_CLUSTER_MASTER" == "
     echo ">>>>>> Start server to be able to rewind (weird hack to avoid durty shutdown issue)"
     rm -rf $PGDATA/pg_xlog/archive_status/
     rm $PGDATA/postmaster.pid
-    gosu postgres pg_ctl -D "$PGDATA"  -o "-c listen_addresses='localhost'" -w start 
+    gosu postgres pg_ctl -D "$PGDATA"  -o "-c listen_addresses='localhost'" -w start
 
     echo ">>>>>> Removing unactive replication slots of partners"
     close_partners_slots
-    
+
     echo ">>>>>> Stop server"
     gosu postgres pg_ctl stop
 
