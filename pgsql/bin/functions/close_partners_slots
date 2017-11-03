@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+REPLICATION_PASSWORD=$(file_env REPLICATION_PASSWORD)
 
 # Basically we should remove all slots from the node which exist on master server
 echo ">>> Getting slots from master node"

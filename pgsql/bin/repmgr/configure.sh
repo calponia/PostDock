@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+REPLICATION_PASSWORD=$(get_secret REPLICATION_PASSWORD)
 
 echo ">>> Setting up repmgr..."
 REPMGR_CONFIG_FILE=/etc/repmgr.conf

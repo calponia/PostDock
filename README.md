@@ -26,7 +26,7 @@ For the rest - you better **follow** the advise and look into the [Postgres-late
 The most important part to configure in Pgpool (apart of general `CONFIGS`) is backends and users which could access these backends. You can configure backends with ENV variable. You can find good example of setting up pgpool in [docker-compose.yml](./docker-compose.yml) file:
 
 ```
-DB_USERS: monkey_user:monkey_pass # in format user:password[,user:password[...]]
+DB_USERS: monkey_user:<monkey_pass|monkey_pass_file> # in format user:password[,user:password[...]]
 BACKENDS: "0:pgmaster:5432:1:/var/lib/postgresql/data:ALLOW_TO_FAILOVER,1:pgslave1::::,3:pgslave3::::,2:pgslave2::::" #,4:pgslaveDOES_NOT_EXIST::::
             # in format num:host:port:weight:data_directory:flag[,...]
             # defaults:
@@ -86,7 +86,7 @@ Role      | Name  | Upstream | Connection String
 * Get map of current cluster(on any `postgres` node):
     * `gosu postgres repmgr cluster show` - tries to connect to all nodes on request ignore status of node in `repmgr_$CLUSTER_NAME.repl_nodes`
     * `gosu postgres psql $REPLICATION_DB -c "SELECT * FROM repmgr_$CLUSTER_NAME.repl_nodes"` - just select data from tables
-* Get `pgpool` status (on any `pgpool` node): `PGPASSWORD=$CHECK_PASSWORD psql -U $CHECK_USER -h localhost template1 -c "show pool_nodes"`
+* Get `pgpool` status (on any `pgpool` node): `PGPASSWORD=$POSTGRES_PASSWORD psql -U $POSTGRES_USER -h localhost template1 -c "show pool_nodes"`
 * In `pgpool` container check if primary node exists: `/usr/local/bin/pgpool/has_write_node.sh`
 
 Any command might be wrapped with `docker-compose` or `kubectl` - `docker-compose exec {NODE} bash -c '{COMMAND}'` or `kubectl exec {POD_NAME} -- bash -c '{COMMAND}'`

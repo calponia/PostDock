@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+REPLICATION_PASSWORD=$(file_env REPLICATION_PASSWORD)
 PRETENDING_MASTER=""
 
 if [ "$PARTNER_NODES" != "" ]; then

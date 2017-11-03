@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+REPLICATION_PASSWORD=$(get_secret REPLICATION_PASSWORD)
 
 echo '>>> TUNING UP POSTGRES...'
 echo "*:$REPLICATION_PRIMARY_PORT:*:$REPLICATION_USER:$REPLICATION_PASSWORD" >> /home/postgres/.pgpass
@@ -40,6 +41,7 @@ chown -R postgres $PGDATA && chmod -R 0700 $PGDATA
 
 echo ">>> Sending in background postgres start..."
 if [[ "$CURRENT_REPLICATION_PRIMARY_HOST" == "" ]]; then
+    [ -f $POSTGRES_INITDB_FILE ] && cp -f $POSTGRES_INITDB_FILE /docker-entrypoint-initdb.d/
     cp -f /usr/local/bin/cluster/postgres/primary/entrypoint.sh /docker-entrypoint-initdb.d/
     /docker-entrypoint.sh postgres &
 else

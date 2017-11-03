@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+PCP_PASSWORD=$(file_env PCP_PASSWORD)
 
 cp -f /var/pgpool_configs/pgpool.conf $CONFIG_FILE
 
@@ -14,12 +15,20 @@ echo *:9898:$PCP_USER:$PCP_PASSWORD > ~/.pcppass
 chmod 0600 ~/.pcppass
 
 echo ">>> Adding users for md5 auth"
-IFS=',' read -ra USER_PASSES <<< "$DB_USERS"
-for USER_PASS in ${USER_PASSES[@]}
-do
-    IFS=':' read -ra USER <<< "$USER_PASS"
-    echo ">>>>>> Adding user ${USER[0]}"
-    pg_md5 --config-file $CONFIG_FILE --md5auth --username="${USER[0]}" "${USER[1]}"
+if [ -n "${DB_USERS}" ]; then
+    IFS=',' read -ra USER_PASSES <<< "$DB_USERS"
+    for USER_PASS in ${USER_PASSES[@]}
+    do
+        IFS=':' read -ra USER <<< "$USER_PASS"
+        echo ">>>>>> Adding user ${USER[0]}"
+        PASSWD="${USER[1]}"
+        [ -f "${USER[1]}" ] && PASSWD="$(cat ${USER[1]})"
+        pg_md5 --config-file $CONFIG_FILE --md5auth --username="${USER[0]}" "${PASSWD}"
+    done
+fi
+for USER in /run/secrets/postgres.user.*; do
+    echo ">>>>>> Adding user ${USER/*.}"
+    pg_md5 --config-file $CONFIG_FILE --md5auth --username="${USER/*.}" "$(cat ${USER})"
 done
 
 echo ">>> Adding check user '$CHECK_USER' for md5 auth"

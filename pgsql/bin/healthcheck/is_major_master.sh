@@ -20,6 +20,8 @@ FAILED_NODES=0
 # ====================================== Cascade replication? Adaptive mode?
 unset NODES
 
+REPLICATION_PASSWORD=$(get_secret REPLICATION_PASSWORD)
+
 if [ "$PARTNER_NODES" != "" ]; then
     echo ">>> Will ask nodes from PARTNER_NODES list"
     IFS=',' read -ra NODES <<< "$PARTNER_NODES"

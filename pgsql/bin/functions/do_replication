@@ -2,6 +2,7 @@
 set -e
 echo ">>> Clonning primary node..."
 echo `date` > $REPLICATION_LOCK_FILE
+REPLICATION_PASSWORD=$(get_secret REPLICATION_PASSWORD)
 
 wait_replication &
 PGPASSWORD=$REPLICATION_PASSWORD gosu postgres repmgr -h $CURRENT_REPLICATION_PRIMARY_HOST -U $REPLICATION_USER -d $REPLICATION_DB -D $PGDATA standby clone --fast-checkpoint --force
