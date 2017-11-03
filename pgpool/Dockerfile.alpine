@@ -49,7 +49,7 @@ COPY ./configs /var/pgpool_configs
 
 RUN set -ex \
   && chmod +x -R /usr/local/bin/pgpool \
-  && ln -s /usr/local/bin/cluster/functions/* /usr/local/bin/
+  && ln -s /usr/local/bin/pgpool/functions/* /usr/local/bin/
 
 # ENV CHECK_USER replication_user
 # ENV CHECK_PASSWORD replication_pass

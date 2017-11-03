@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-
 mkdir -p /usr/local/etc
 export CONFIG_FILE='/usr/local/etc/pgpool.conf'
 export PCP_FILE='/usr/local/etc/pcp.conf'

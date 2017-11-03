@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
-PCP_PASSWORD=$(file_env PCP_PASSWORD)
+PCP_PASSWORD=$(get_secret PCP_PASSWORD)
+CHECK_PASSWORD=$(get_secret CHECK_PASSWORD)
 
 cp -f /var/pgpool_configs/pgpool.conf $CONFIG_FILE
 
@@ -27,6 +28,8 @@ if [ -n "${DB_USERS}" ]; then
     done
 fi
 for USER in /run/secrets/postgres.user.*; do
+    USERNAME="${USER/*.}"
+    if [ "${USERNAME}" == "${PCP_USER}" ] || [ "${USERNAME}" == "${CHECK_USER}" ]; then continue; fi
     echo ">>>>>> Adding user ${USER/*.}"
     pg_md5 --config-file $CONFIG_FILE --md5auth --username="${USER/*.}" "$(cat ${USER})"
 done
