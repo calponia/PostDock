@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-REPLICATION_PASSWORD=$(file_env REPLICATION_PASSWORD)
+# .
+REPLICATION_PASSWORD=$(get_secret REPLICATION_PASSWORD)
 PRETENDING_MASTER=""
 
 if [ "$PARTNER_NODES" != "" ]; then
@@ -10,7 +11,7 @@ if [ "$PARTNER_NODES" != "" ]; then
     do
 
         #  echo ">>>>>> Checking NODE=$NODE..."
-        AM_I_MASTER=`PGCONNECT_TIMEOUT=$CHECK_PGCONNECT_TIMEOUT PGPASSWORD=$REPLICATION_PASSWORD psql -h $NODE -U $REPLICATION_USER $REPLICATION_DB  -tAc "SELECT count(*) FROM repmgr_$CLUSTER_NAME.repl_show_nodes WHERE  cluster='$CLUSTER_NAME' AND conninfo LIKE '%host=$NODE%' AND (upstream_node_name IS  NULL OR upstream_node_name = '') AND active=true"`
+        AM_I_MASTER=`PGCONNECT_TIMEOUT=$CHECK_PGCONNECT_TIMEOUT PGPASSWORD=$REPLICATION_PASSWORD psql -h $NODE -U $REPLICATION_USER $REPLICATION_DB  -tAc "SELECT count(*) FROM repmgr.show_nodes WHERE conninfo LIKE '%host=$NODE%' AND (upstream_node_name IS  NULL OR upstream_node_name = '') AND active=true"`
         if [[ "$?" -ne "0" ]]; then
             #  echo ">>>>>> Skipping: failed to get master from the node!"
             continue

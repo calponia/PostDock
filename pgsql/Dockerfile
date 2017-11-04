@@ -2,32 +2,12 @@ FROM postgres:10
 ARG POSTGRES_VERSION=10
 
 RUN set -ex \
+  && echo "deb http://deb.debian.org/debian experimental main" >> /etc/apt/sources.list \
   && apt-get update --fix-missing \
-  && apt-get install -y --no-install-recommends \
-    postgresql-server-dev-$POSTGRES_VERSION
-
-ARG REPMGR_VERSION=v3.3.2
-ARG REPMGR_SHA1=48ed41fd552df50b597b547deccfecd8b12a5cf1
-RUN set -ex \
-  && apt-get install -y --no-install-recommends curl make gcc libxslt-dev libxml2-dev libedit-dev libc-dev ca-certificates \
-  && curl -sSL  https://github.com/2ndQuadrant/repmgr/archive/${REPMGR_VERSION}.tar.gz -o ${REPMGR_VERSION}.tar.gz \
-  && echo "${REPMGR_SHA1}  ${REPMGR_VERSION}.tar.gz" | sha1sum -c - \
-  && tar zxf ${REPMGR_VERSION}.tar.gz \
-  && cd repmgr-* \
-  && $(./configure || true) \
-  && make USE_PGXS=1 install \
-  && cd .. \
-  && rm -Rf repmgr-* ${REPMGR_VERSION}.tar.gz \
-  && apt-get purge -y --auto-remove curl make gcc libxslt-dev libxml2-dev libedit-dev libc-dev ca-certificates \
+  && apt-get -t experimental install -y --no-install-recommends \
+    postgresql-server-dev-${POSTGRES_VERSION} \
+    postgresql-${POSTGRES_VERSION}-repmgr \
   && rm -rf /var/lib/apt/lists/*
-
-# Inherited variables
-# ENV POSTGRES_PASSWORD monkey_pass
-# ENV POSTGRES_USER monkey_user
-# ENV POSTGRES_DB monkey_db
-
-# Name of the cluster you want to start
-ENV CLUSTER_NAME pg_cluster
 
 # special repmgr db for cluster info
 ENV REPLICATION_DB replication_db

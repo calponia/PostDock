@@ -22,22 +22,18 @@ RUN set -ex \
   && rm -rf /tmp/pgpool-II-${PGPOOL_VERSION} \
   && apk del .build-deps
 
-# needed for dockerize needed > maybe removable?
-RUN set -ex \
-  && apk add --no-cache \
-    ca-certificates \
-    openssl
-
 ENV DOCKERIZE_VERSION v0.5.0
-RUN set -ex \
-  && wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz \
-  && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
-
 ENV GOSU_VERSION 1.10
 RUN set -ex \
+  && apk add --no-cache --virtual .install-deps \
+    ca-certificates \
+    openssl \
+  && wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz \
+  && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz \
   && wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64" \
   && chmod +x /usr/local/bin/gosu \
-	&& gosu nobody true
+	&& gosu nobody true \
+  && apk del .install-deps
 
 RUN set -ex \
   && mkdir -p /var/log/postgresql \

@@ -84,8 +84,8 @@ Role      | Name  | Upstream | Connection String
 ## Useful commands
 
 * Get map of current cluster(on any `postgres` node):
-    * `gosu postgres repmgr cluster show` - tries to connect to all nodes on request ignore status of node in `repmgr_$CLUSTER_NAME.repl_nodes`
-    * `gosu postgres psql $REPLICATION_DB -c "SELECT * FROM repmgr_$CLUSTER_NAME.repl_nodes"` - just select data from tables
+    * `gosu postgres repmgr cluster show` - tries to connect to all nodes on request ignore status of node in `repmgr.nodes`
+    * `gosu postgres psql $REPLICATION_DB -c "SELECT * FROM repmgr.nodes"` - just select data from tables
 * Get `pgpool` status (on any `pgpool` node): `PGPASSWORD=$POSTGRES_PASSWORD psql -U $POSTGRES_USER -h localhost template1 -c "show pool_nodes"`
 * In `pgpool` container check if primary node exists: `/usr/local/bin/pgpool/has_write_node.sh`
 

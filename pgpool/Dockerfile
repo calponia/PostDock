@@ -17,7 +17,9 @@ RUN set -ex \
   && apt-get update \
   && apt-get install -y \
     postgresql-client-${POSTGRES_CLIENT_VERSION} \
-    pgpool2=${PGPOOL_VERSION}
+    pgpool2=${PGPOOL_VERSION} \
+  && apt-get purge -y --auto-remove gnupg2 \
+  && rm -rf /var/lib/apt/lists/*
 
 ENV DOCKERIZE_VERSION v0.5.0
 RUN set -ex \

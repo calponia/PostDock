@@ -32,7 +32,7 @@ else
         exit 0
     fi
     echo ">>> Will ask all nodes in the cluster"
-    read -ra NODES <<< `PGPASSWORD=$REPLICATION_PASSWORD psql -h $CLUSTER_NODE_NETWORK_NAME -U $REPLICATION_USER $REPLICATION_DB  -c "SELECT conninfo FROM repmgr_$CLUSTER_NAME.repl_show_nodes WHERE cluster='$CLUSTER_NAME'" | grep host | awk '{print $3}' | cut -d "=" -f2`
+    read -ra NODES <<< `PGPASSWORD=$REPLICATION_PASSWORD psql -h $CLUSTER_NODE_NETWORK_NAME -U $REPLICATION_USER $REPLICATION_DB  -c "SELECT conninfo FROM repmgr.show_nodes | grep host | awk '{print $3}' | cut -d "=" -f2`
 fi
 
 NODES_COUNT="${#NODES[@]}"
@@ -44,7 +44,7 @@ for NODE in "${NODES[@]}"; do
     NO_ROUTE=false
     echo ">>> Checking node $NODE"
 
-    MASTER=`PGCONNECT_TIMEOUT=$CHECK_PGCONNECT_TIMEOUT PGPASSWORD=$REPLICATION_PASSWORD psql -h $NODE -U $REPLICATION_USER $REPLICATION_DB  -tAc "SELECT upstream_node_name FROM repmgr_$CLUSTER_NAME.repl_show_nodes WHERE  cluster='$CLUSTER_NAME' AND conninfo LIKE '%host=$NODE%' AND (upstream_node_name IS NOT NULL AND upstream_node_name <>'') AND active=true"`
+    MASTER=`PGCONNECT_TIMEOUT=$CHECK_PGCONNECT_TIMEOUT PGPASSWORD=$REPLICATION_PASSWORD psql -h $NODE -U $REPLICATION_USER $REPLICATION_DB  -tAc "SELECT upstream_node_name FROM repmgr.show_nodes WHERE conninfo LIKE '%host=$NODE%' AND (upstream_node_name IS NOT NULL AND upstream_node_name <>'') AND active=true"`
     if [[ "$?" -ne "0" ]]; then
         FAILED_NODES=$((FAILED_NODES + 1))
         echo ">>>>>> Failed nodes - $FAILED_NODES"
