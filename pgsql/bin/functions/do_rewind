@@ -23,7 +23,6 @@ if [[ "$MASTER_SLAVE_SWITCH" == "1" ]] || [ "$TRY_TO_FOLLOW_CLUSTER_MASTER" == "
     gosu postgres pg_ctl stop
 
     echo ">>>>>> Creating replication slot for the standby in case it's not there"
-    cat $PGDATA/recovery.conf
     REPLICATION_SLOT=`cat $PGDATA/recovery.conf | grep primary_slot_name | awk -F" = " '{print $2}'`
     if [ "$REPLICATION_SLOT" != "" ]; then
         echo ">>>>>>>>> Creating $REPLICATION_SLOT"
