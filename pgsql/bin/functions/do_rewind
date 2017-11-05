@@ -2,12 +2,14 @@
 REPLICATION_PASSWORD=$(get_secret REPLICATION_PASSWORD)
 
 echo `date` > $REPLICATION_LOCK_FILE
+
 echo ">>> Rewinding to the latest state"
 TRY_TO_FOLLOW_CLUSTER_MASTER=`PGCONNECT_TIMEOUT=$CHECK_PGCONNECT_TIMEOUT PGPASSWORD=$REPLICATION_PASSWORD  psql -h $CURRENT_REPLICATION_PRIMARY_HOST -U $REPLICATION_USER  $REPLICATION_DB -tAc "SELECT count(*) FROM repmgr.nodes WHERE type='primary' AND conninfo LIKE '%host=$CURRENT_REPLICATION_PRIMARY_HOST%'"`
 
 if [[ "$MASTER_SLAVE_SWITCH" == "1" ]] || [ "$TRY_TO_FOLLOW_CLUSTER_MASTER" == "1" ]; then
-    echo ">>>>>> Archiving configs"
-    gosu postgres repmgr standby archive-config --config-archive-dir=/tmp/repmgr-archive
+    # TODO what for (can not find anything on this command >> unknown repmgr action 'standby archive-config')
+    # echo ">>>>>> Archiving configs"
+    # gosu postgres repmgr standby archive-config --upstream-node-id="${REPLICATION_UPSTREAM_NODE_ID}" --config-archive-dir=/tmp/repmgr-archive
 
     echo ">>>>>> Start server to be able to rewind (weird hack to avoid durty shutdown issue)"
     rm -rf $PGDATA/pg_xlog/archive_status/
@@ -21,6 +23,7 @@ if [[ "$MASTER_SLAVE_SWITCH" == "1" ]] || [ "$TRY_TO_FOLLOW_CLUSTER_MASTER" == "
     gosu postgres pg_ctl stop
 
     echo ">>>>>> Creating replication slot for the standby in case it's not there"
+    cat $PGDATA/recovery.conf
     REPLICATION_SLOT=`cat $PGDATA/recovery.conf | grep primary_slot_name | awk -F" = " '{print $2}'`
     if [ "$REPLICATION_SLOT" != "" ]; then
         echo ">>>>>>>>> Creating $REPLICATION_SLOT"
@@ -29,8 +32,9 @@ if [[ "$MASTER_SLAVE_SWITCH" == "1" ]] || [ "$TRY_TO_FOLLOW_CLUSTER_MASTER" == "
     echo ">>>>>> Rewind to the host $CURRENT_REPLICATION_PRIMARY_HOST"
     gosu postgres pg_rewind --source-server="user=$REPLICATION_USER password=$REPLICATION_PASSWORD host=$CURRENT_REPLICATION_PRIMARY_HOST dbname=$REPLICATION_DB  port=$REPLICATION_PRIMARY_PORT connect_timeout=10" --target-pgdata=$PGDATA
 
-    echo ">>>>>> Restoring configs"
-    gosu postgres repmgr standby restore-config -D $PGDATA --config-archive-dir=/tmp/repmgr-archive
+    # TODO what for (can not find anything on this command >> unknown repmgr action 'standby archive-config')
+    # echo ">>>>>> Restoring configs"
+    # gosu postgres repmgr standby restore-config -D $PGDATA --config-archive-dir=/tmp/repmgr-archive
 fi
 
 
@@ -38,7 +42,8 @@ if [ "$TRY_TO_FOLLOW_CLUSTER_MASTER" == "0" ]; then
     echo ">>>>>> Repmgr can follow only main cluster master"
 else
     echo ">>>>>> Tell repmgr to follow upstream for the node"
-    gosu postgres repmgr -h $CURRENT_REPLICATION_PRIMARY_HOST -p $REPLICATION_PRIMARY_PORT -d $REPLICATION_DB -U $REPLICATION_USER -D $PGDATA standby follow -W --log-level DEBUG --verbose
+    # TODO what was '-W' for?
+    gosu postgres repmgr -h $CURRENT_REPLICATION_PRIMARY_HOST -p $REPLICATION_PRIMARY_PORT -d $REPLICATION_DB -U $REPLICATION_USER -D $PGDATA standby follow --log-level DEBUG --verbose --upstream-node-id="$(get_upstream_node_id)"
 
     echo ">>>>>> Stop server"
     gosu postgres pg_ctl stop

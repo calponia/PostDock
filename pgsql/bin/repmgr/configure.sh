@@ -28,25 +28,4 @@ priority=$NODE_PRIORITY
 data_directory=/var/lib/postgresql/data
 " >> $REPMGR_CONFIG_FILE
 
-echo ">>> Setting up upstream node..."
-if [[ "$CURRENT_REPLICATION_PRIMARY_HOST" != "" ]]; then
-
-    LOCKED_STANDBY=`cat $STANDBY_ROLE_LOCK_FILE_NAME || echo ''`
-    echo ">>> Previously Locked standby upstream node LOCKED_STANDBY='$LOCKED_STANDBY'"
-    if [[ "$LOCKED_STANDBY" != '' ]]; then
-        REPLICATION_UPSTREAM_NODE_ID="$LOCKED_STANDBY"
-    else
-        wait_upstream_postgres 5
-        REPLICATION_UPSTREAM_NODE_ID=`get_upstream_node_id`
-    fi
-
-    if [[ "$REPLICATION_UPSTREAM_NODE_ID" == "" ]]; then
-        echo ">>> Can not get REPLICATION_UPSTREAM_NODE_ID from LOCK file or by CURRENT_REPLICATION_PRIMARY_HOST=$CURRENT_REPLICATION_PRIMARY_HOST"
-        exit 1
-    else
-        echo ">>> REPLICATION_UPSTREAM_NODE_ID=$REPLICATION_UPSTREAM_NODE_ID"
-    fi
-
-    echo "upstream_node=$REPLICATION_UPSTREAM_NODE_ID" >> $REPMGR_CONFIG_FILE
-fi
 chown postgres $REPMGR_CONFIG_FILE

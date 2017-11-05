@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-echo ">>> Registering node with role master"
-gosu postgres repmgr primary register
+echo ">>> Registering node with role primary"
+gosu postgres repmgr primary register --force
