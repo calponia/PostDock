@@ -1,1 +1,0 @@
-./Pgpool-3.6.Dockerfile
